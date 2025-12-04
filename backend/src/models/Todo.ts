@@ -1,10 +1,10 @@
-import { Schema, model, Types, Document } from "mongoose";
+import mongoose, { Schema, model, Document } from "mongoose";
 
 export interface ITodo extends Document {
   title: string;
   description?: string;
   estimatedMinutes?: number;
-  userId: Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
   createdAt: Date;
   completed: boolean;
 }
@@ -12,14 +12,18 @@ export interface ITodo extends Document {
 const TodoSchema = new Schema<ITodo>(
   {
     title: { type: String, required: true },
+
     description: { type: String },
+
     estimatedMinutes: { type: Number, default: 25 },
+
     userId: {
-      type: Schema.Types.ObjectId, // ✔ FIXED
+      type: mongoose.Schema.Types.ObjectId, // ✅ FIXED
       ref: "User",
-      required: true
+      required: true,
     },
-    completed: { type: Boolean, default: false }
+
+    completed: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
