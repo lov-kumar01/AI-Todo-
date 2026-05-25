@@ -9,7 +9,12 @@ import { errorHandler } from "./middleware/errorHandler";
 export const app = express();
 
 // Middlewares
-app.use(cors());               // allow frontend
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    credentials: true
+  })
+);                             // allow frontend
 app.use(express.json());       // parse JSON
 app.use(morgan("dev"));        // HTTP logging
 

@@ -1,11 +1,24 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 import { Todo } from "../models/Todo";
 import { User } from "../models/User";
+import { devStore } from "../utils/devStore";
+
+const getUserId = (req: Request) => req.user!.userId;
+const isDbConnected = () => mongoose.connection.readyState === 1;
 
 // GET all todos
 export const getTodos = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).userId;
+    const userId = getUserId(req);
+
+    if (!isDbConnected()) {
+      const todos = devStore.todos
+        .filter((todo) => todo.userId === userId)
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+      return res.json(todos);
+    }
 
     const todos = await Todo.find({ userId }).sort({ createdAt: -1 });
 
@@ -18,8 +31,24 @@ export const getTodos = async (req: Request, res: Response) => {
 // CREATE a new todo
 export const createTodo = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).userId;
+    const userId = getUserId(req);
     const { title, description, estimatedMinutes } = req.body;
+
+    if (!isDbConnected()) {
+      const newTodo = {
+        _id: devStore.id(),
+        userId,
+        title,
+        description,
+        estimatedMinutes,
+        completed: false,
+        createdAt: new Date()
+      };
+
+      devStore.todos.push(newTodo);
+      devStore.save();
+      return res.status(201).json(newTodo);
+    }
 
     const newTodo = await Todo.create({
       userId,
@@ -38,7 +67,19 @@ export const createTodo = async (req: Request, res: Response) => {
 // TOGGLE completed/unfinished
 export const toggleTodo = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).userId;
+    const userId = getUserId(req);
+
+    if (!isDbConnected()) {
+      const todo = devStore.todos.find(
+        (item) => item._id === req.params.id && item.userId === userId
+      );
+
+      if (!todo) return res.status(404).json({ message: "Todo not found" });
+
+      todo.completed = !todo.completed;
+      devStore.save();
+      return res.json(todo);
+    }
 
     const todo = await Todo.findOne({ _id: req.params.id, userId });
 
@@ -56,7 +97,20 @@ export const toggleTodo = async (req: Request, res: Response) => {
 // DELETE todo
 export const deleteTodo = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).userId;
+    const userId = getUserId(req);
+
+    if (!isDbConnected()) {
+      const index = devStore.todos.findIndex(
+        (todo) => todo._id === req.params.id && todo.userId === userId
+      );
+
+      if (index >= 0) {
+        devStore.todos.splice(index, 1);
+        devStore.save();
+      }
+
+      return res.json({ message: "Todo deleted" });
+    }
 
     await Todo.deleteOne({ _id: req.params.id, userId });
 
@@ -69,8 +123,16 @@ export const deleteTodo = async (req: Request, res: Response) => {
 // SAVE USER ACTIONS (used for suggestions)
 export const logEvent = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).userId;
+    const userId = getUserId(req);
     const { title } = req.body;
+
+    if (!isDbConnected()) {
+      const user = devStore.users.find((item) => item.id === userId);
+      user?.activityHistory.push(title);
+      devStore.save();
+
+      return res.json({ message: "Event logged" });
+    }
 
     await User.updateOne(
       { _id: userId },
@@ -86,7 +148,28 @@ export const logEvent = async (req: Request, res: Response) => {
 // SUGGEST SIMILAR TASKS BASED ON HISTORY
 export const getSuggestions = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).userId;
+    const userId = getUserId(req);
+
+    if (!isDbConnected()) {
+      const user = devStore.users.find((item) => item.id === userId);
+      const history = user?.activityHistory || [];
+
+      if (history.length === 0) return res.json([]);
+
+      const freq: Record<string, number> = {};
+      history.forEach((task) => {
+        const keyword = task.split(" ")[0].toLowerCase();
+        freq[keyword] = (freq[keyword] || 0) + 1;
+      });
+
+      const mostUsed = Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
+
+      return res.json([
+        `Finish pending ${mostUsed} tasks`,
+        `Plan your next ${mostUsed} related work`,
+        `Review old ${mostUsed} notes`
+      ]);
+    }
 
     const user = await User.findById(userId);
 

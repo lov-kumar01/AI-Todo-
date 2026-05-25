@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { loginRequest } from "../api/authApi";
 import { useAuthStore } from "../store/authStore";
 import { useNavigate, Link } from "react-router-dom";
+import { Boxes } from "@/components/ui/background-boxes";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -24,8 +25,11 @@ export const LoginPage = () => {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="max-w-md w-full frost-card p-8">
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden bg-slate-950">
+      <Boxes />
+      <div className="absolute inset-0 w-full h-full bg-slate-950 z-10 [mask-image:radial-gradient(transparent,white)] pointer-events-none" />
+
+      <div className="max-w-md w-full frost-card p-8 relative z-20">
         
         <h1 className="text-center text-4xl premium-heading mb-6">
           ✨ Welcome to Today’s Todo List ✨
@@ -39,7 +43,7 @@ export const LoginPage = () => {
             <input
               type="email"
               {...register("email")}
-              className="w-full glow-input p-3 rounded-xl mt-1"
+              className="w-full glow-input p-3 rounded-xl mt-1 bg-white text-black placeholder:text-gray-500"
             />
             {errors.email && <p className="text-red-400 text-xs">{errors.email.message}</p>}
           </div>
@@ -50,7 +54,7 @@ export const LoginPage = () => {
             <input
               type="password"
               {...register("password")}
-              className="w-full glow-input p-3 rounded-xl mt-1"
+              className="w-full glow-input p-3 rounded-xl mt-1 bg-white text-black placeholder:text-gray-500"
             />
             {errors.password && <p className="text-red-400 text-xs">{errors.password.message}</p>}
           </div>

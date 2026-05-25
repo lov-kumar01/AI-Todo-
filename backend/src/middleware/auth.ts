@@ -1,16 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwt";
 
-// Extend Express Request to include "user"
-export interface AuthRequest extends Request {
-  user?: {
-    userId: string;
-    email: string;
-  };
-}
-
 export const authMiddleware = (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {

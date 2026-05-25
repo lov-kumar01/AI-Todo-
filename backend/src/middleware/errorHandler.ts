@@ -1,10 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { ErrorLog } from "../models/ErrorLog";
-import { AuthRequest } from "./auth";
 
 export const errorHandler = async (
   err: any,
-  req: AuthRequest,
+  req: Request,
   res: Response,
   _next: NextFunction
 ) => {

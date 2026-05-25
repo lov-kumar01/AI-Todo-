@@ -1,8 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
+import mongoose from "mongoose";
 import { User } from "../models/User";
 import { hashPassword, comparePassword } from "../utils/password";
 import { signToken } from "../utils/jwt";
+import { devStore } from "../utils/devStore";
+
+const isDbConnected = () => mongoose.connection.readyState === 1;
 
 export const register = async (
   req: Request,
@@ -11,6 +15,37 @@ export const register = async (
 ) => {
   try {
     const { email, password } = req.body;
+
+    if (!isDbConnected()) {
+      const existing = devStore.users.find((user) => user.email === email);
+      if (existing) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+
+      const hashed = await hashPassword(password);
+      const user = {
+        id: devStore.id(),
+        email,
+        password: hashed,
+        activityHistory: []
+      };
+
+      devStore.users.push(user);
+      devStore.save();
+
+      const token = signToken({
+        userId: user.id,
+        email: user.email
+      });
+
+      return res.status(201).json({
+        user: {
+          id: user.id,
+          email: user.email
+        },
+        token
+      });
+    }
 
     // Check if email already exists
     const existing = await User.findOne({ email });
@@ -46,6 +81,31 @@ export const register = async (
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
+
+    if (!isDbConnected()) {
+      const user = devStore.users.find((item) => item.email === email);
+      if (!user) {
+        return res.status(400).json({ message: "Invalid credentials" });
+      }
+
+      const isPasswordCorrect = await comparePassword(password, user.password);
+      if (!isPasswordCorrect) {
+        return res.status(400).json({ message: "Invalid credentials" });
+      }
+
+      const token = signToken({
+        userId: user.id,
+        email: user.email
+      });
+
+      return res.json({
+        user: {
+          id: user.id,
+          email: user.email
+        },
+        token
+      });
+    }
 
     const user = await User.findOne({ email });
     if (!user) {

@@ -7,6 +7,7 @@ export const connectDB = async () => {
     console.log("✅ MongoDB connected");
   } catch (error) {
     console.error("❌ Error connecting MongoDB", error);
-    process.exit(1);
+    console.warn("MongoDB unavailable. Running with in-memory dev storage.");
+    return false;
   }
 };
