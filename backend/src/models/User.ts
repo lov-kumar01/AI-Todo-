@@ -30,6 +30,10 @@ export interface IUser extends Document {
   // Activity
   activityHistory: string[];
   lastLogin?: Date;
+
+  // Timestamps (auto-managed by MongoDB)
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const UserSchema = new Schema<IUser>(
