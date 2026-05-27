@@ -3,28 +3,42 @@
   "version": "1.0.0",
   "description": "Full-stack AI todo app with React, Express, TypeScript, and MongoDB.",
   "private": true,
+
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend run dev",
+
     "build": "npm run build:backend && npm run build:frontend",
-    "build:backend": "npm --prefix backend run build",
+
+    "build:backend": "cd backend && node ./node_modules/typescript/bin/tsc",
+
     "build:frontend": "npm --prefix frontend run build",
+
     "start": "npm --prefix backend run start",
+
     "preview": "npm --prefix frontend run preview"
   },
+
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lov-kumar01/AI-Todo-.git"
   },
+
   "keywords": [],
+
   "author": "",
+
   "license": "ISC",
+
   "type": "commonjs",
+
   "bugs": {
     "url": "https://github.com/lov-kumar01/AI-Todo-/issues"
   },
+
   "homepage": "https://github.com/lov-kumar01/AI-Todo-#readme",
+
   "devDependencies": {
     "baseline-browser-mapping": "^2.10.32",
     "concurrently": "^9.2.1"
