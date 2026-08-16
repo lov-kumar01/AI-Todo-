@@ -8,15 +8,21 @@ import { errorHandler } from "./middleware/errorHandler";
 
 export const app = express();
 
-// Middlewares
+// CORS
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
-    credentials: true
+    origin: [
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "https://ai-todo-lac.vercel.app",
+    ],
+    credentials: true,
   })
-);                             // allow frontend
-app.use(express.json());       // parse JSON
-app.use(morgan("dev"));        // HTTP logging
+);
+
+// Middlewares
+app.use(express.json());
+app.use(morgan("dev"));
 
 // Health check route
 app.get("/health", (_req, res) => {
