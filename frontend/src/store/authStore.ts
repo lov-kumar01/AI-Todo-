@@ -8,39 +8,52 @@ interface User {
 interface AuthState {
   user: User | null;
   token: string | null;
+
   setAuth: (user: User, token: string) => void;
-  loadFromStorage: () => void;
   logout: () => void;
+  loadFromStorage: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
 
-  // Save user + token
-  setAuth: (user: User, token: string) => {
+  setAuth: (user, token) => {
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(user));
 
-    set({ user, token });
+    set({
+      user,
+      token,
+    });
   },
 
-  // Load user + token on refresh
-  loadFromStorage: () => {
-    const token = localStorage.getItem("token");
-    const userData = localStorage.getItem("user");
-
-    if (token && userData) {
-      const parsedUser = JSON.parse(userData);
-      set({ user: parsedUser, token });
-    }
-  },
-
-  // Remove everything and logout
   logout: () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
-    set({ user: null, token: null });
-  }
+    set({
+      user: null,
+      token: null,
+    });
+  },
+
+  loadFromStorage: () => {
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+
+    let user: User | null = null;
+
+    try {
+      user = storedUser ? JSON.parse(storedUser) : null;
+    } catch {
+      user = null;
+      localStorage.removeItem("user");
+    }
+
+    set({
+      token,
+      user,
+    });
+  },
 }));

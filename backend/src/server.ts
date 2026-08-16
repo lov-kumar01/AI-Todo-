@@ -1,18 +1,19 @@
 import { app } from "./app";
-import { connectDB } from "./config/db";
 import { ENV } from "./config/env";
+import { connectDB } from "./config/db";
 
-const startServer = async () => {
+const PORT = Number(ENV.PORT) || 4000;
+
+(async () => {
   try {
     await connectDB();
-
-    app.listen(ENV.PORT, () => {
-      console.log(`🚀 Server running at http://localhost:${ENV.PORT}`);
+    app.listen(PORT, () => {
+      // eslint-disable-next-line no-console
+      console.log(`Server running at http://localhost:${PORT}`);
     });
-  } catch (error) {
-    console.error("❌ Failed to start server:", error);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to start server:", err);
     process.exit(1);
   }
-};
-
-startServer();
+})();
