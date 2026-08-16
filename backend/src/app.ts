@@ -8,30 +8,30 @@ import { errorHandler } from "./middleware/errorHandler";
 
 export const app = express();
 
-// CORS
 app.use(
   cors({
     origin: [
       "http://localhost:3000",
       "http://127.0.0.1:3000",
+
+      // Vercel production URL
       "https://ai-todo-lac.vercel.app",
+
+      // Vercel main branch URL
+      "https://ai-todo-git-main-lov-kumar01s-projects.vercel.app",
     ],
     credentials: true,
   })
 );
 
-// Middlewares
 app.use(express.json());
 app.use(morgan("dev"));
 
-// Health check route
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
 
-// Global error handler
 app.use(errorHandler);
