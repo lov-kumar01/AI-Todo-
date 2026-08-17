@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 
+import quoteRoutes from "./routes/quote.routes";
+import aiRoutes from "./routes/ai.routes";
 import authRoutes from "./routes/auth.routes";
 import todoRoutes from "./routes/todo.routes";
 import { errorHandler } from "./middleware/errorHandler";
@@ -33,5 +35,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/todos", todoRoutes);
+app.use("/api/ai", aiRoutes);
+app.use("/api/quote", quoteRoutes);
 
 app.use(errorHandler);
